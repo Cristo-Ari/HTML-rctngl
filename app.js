@@ -3,29 +3,12 @@ class Point {
         this.getXOffsetPercentage = getXOffsetPercentage;
         this.getYOffsetPercentage = getYOffsetPercentage;
     }
-
-    getX(canvasWidth) {
-        return this.getXOffsetPercentage() * canvasWidth;
-    }
-
-    getY(canvasHeight) {
-        return canvasHeight - this.getYOffsetPercentage() * canvasHeight;
-    }
 }
 
 class Rectangle {
     constructor(topLeftPoint, bottomRightPoint) {
         this.topLeftPoint = topLeftPoint;
         this.bottomRightPoint = bottomRightPoint;
-    }
-
-    draw(context, canvasWidth, canvasHeight) {
-        const x = this.topLeftPoint.getX(canvasWidth);
-        const y = this.topLeftPoint.getY(canvasHeight);
-        const width = this.bottomRightPoint.getX(canvasWidth) - x;
-        const height = y - this.bottomRightPoint.getY(canvasHeight);
-        context.fillStyle = "rgba(0, 150, 255, 0.5)";
-        context.fillRect(x, y - height, width, height);
     }
 }
 
@@ -55,8 +38,18 @@ class RectangleDrawer {
 
     drawAllRectangles() {
         for (let rectangle of this.rectangles) {
-            rectangle.draw(this.context, this.canvas.width, this.canvas.height);
+            this.drawRectangle(rectangle);
         }
+    }
+
+    drawRectangle(rectangle) {
+        const x = rectangle.topLeftPoint.getXOffsetPercentage() * this.canvas.width;
+        const y = (1 - rectangle.topLeftPoint.getYOffsetPercentage()) * this.canvas.height;
+        const width = (rectangle.bottomRightPoint.getXOffsetPercentage() * this.canvas.width) - x;
+        const height = y - (1 - rectangle.bottomRightPoint.getYOffsetPercentage()) * this.canvas.height;
+
+        this.context.fillStyle = "rgba(0, 150, 255, 0.5)";
+        this.context.fillRect(x, y - height, width, height);
     }
 
     addRectangle(rectangle) {
@@ -104,27 +97,16 @@ drawer.resizeCanvasToFitSquare();
 // Обработчики для кнопок
 document.getElementById('upButton').addEventListener('click', () => {
     yOffset += moveStepPercentage;
-    updateRectanglePosition();
 });
 
 document.getElementById('downButton').addEventListener('click', () => {
     yOffset -= moveStepPercentage;
-    updateRectanglePosition();
 });
 
 document.getElementById('leftButton').addEventListener('click', () => {
     xOffset -= moveStepPercentage;
-    updateRectanglePosition();
 });
 
 document.getElementById('rightButton').addEventListener('click', () => {
     xOffset += moveStepPercentage;
-    updateRectanglePosition();
 });
-
-// Функция для обновления положения прямоугольника при изменении смещений
-function updateRectanglePosition() {
-    smallRectangle.topLeftPoint = createPoint(0.25, 0.75);
-    smallRectangle.bottomRightPoint = createPoint(0.75, 0.25);
-}
- 
